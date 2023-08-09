@@ -32,6 +32,10 @@
    Desc:   Planning a simple sequence of Cartesian motions
 */
 
+/*
+	modified for UR5e by RoboCop 09.08.2023
+*/
+
 #include <moveit/task_constructor/task.h>
 
 #include <moveit/task_constructor/stages/fixed_state.h>
@@ -50,21 +54,23 @@ Task createTask() {
 	Task t;
 	t.stages()->setName("Cartesian Path");
 
-	const std::string group = "panda_arm";
-	const std::string eef = "hand";
+	const std::string group = "manipulator";
+	const std::string eef = "endeffector";
 
 	// create Cartesian interpolation "planner" to be used in various stages
 	auto cartesian_interpolation = std::make_shared<solvers::CartesianPath>();
+	// cartesian_interpolation->setMaxAccelerationScaling(0.6);
 	// create a joint-space interpolation "planner" to be used in various stages
 	auto joint_interpolation = std::make_shared<solvers::JointInterpolationPlanner>();
 
 	// start from a fixed robot state
 	t.loadRobotModel();
 	auto scene = std::make_shared<planning_scene::PlanningScene>(t.getRobotModel());
+
 	{
 		auto& state = scene->getCurrentStateNonConst();
-		state.setToDefaultValues(state.getJointModelGroup(group), "ready");
-
+		state.setToDefaultValues(state.getJointModelGroup(group), "home");
+		
 		auto fixed = std::make_unique<stages::FixedState>("initial state");
 		fixed->setState(scene);
 		t.add(std::move(fixed));
@@ -74,18 +80,18 @@ Task createTask() {
 		auto stage = std::make_unique<stages::MoveRelative>("x +0.2", cartesian_interpolation);
 		stage->setGroup(group);
 		geometry_msgs::Vector3Stamped direction;
-		direction.header.frame_id = "world";
+		direction.header.frame_id = "base_link";
 		direction.vector.x = 0.2;
 		stage->setDirection(direction);
 		t.add(std::move(stage));
 	}
 
 	{
-		auto stage = std::make_unique<stages::MoveRelative>("y -0.3", cartesian_interpolation);
+		auto stage = std::make_unique<stages::MoveRelative>("y +0.1", cartesian_interpolation);
 		stage->setGroup(group);
 		geometry_msgs::Vector3Stamped direction;
-		direction.header.frame_id = "world";
-		direction.vector.y = -0.3;
+		direction.header.frame_id = "base_link";
+		direction.vector.y = +0.1;
 		stage->setDirection(direction);
 		t.add(std::move(stage));
 	}
@@ -94,24 +100,39 @@ Task createTask() {
 		auto stage = std::make_unique<stages::MoveRelative>("rz +45°", cartesian_interpolation);
 		stage->setGroup(group);
 		geometry_msgs::TwistStamped twist;
-		twist.header.frame_id = "world";
+		twist.header.frame_id = "base_link";
 		twist.twist.angular.z = M_PI / 4.;
 		stage->setDirection(twist);
+		t.add(std::move(stage));
+	}
+
+	{
+		auto stage = std::make_unique<stages::MoveRelative>("x -0.1, y +0.1, z -0.1", cartesian_interpolation);
+		stage->setGroup(group);
+		geometry_msgs::Vector3Stamped direction;
+		direction.header.frame_id = "base_link";
+		direction.vector.x = -0.1;
+		direction.vector.y = +0.1;
+		direction.vector.y = -0.1;
+		stage->setDirection(direction);
+		t.add(std::move(stage));
+	}
+
+	{  // perform a Joint motion, defined as a relative offset in joint space
+		auto stage = std::make_unique<stages::MoveRelative>("joint move ", joint_interpolation);
+		stage->setGroup(group);
+		std::map<std::string, double> offsets = { { "elbow_joint", M_PI / 12 },
+			                                       { "shoulder_pan_joint", -M_PI / 12 },
+			                                       { "wrist_1_joint", 0.1 } };
+		stage->setDirection(offsets);
 		t.add(std::move(stage));
 	}
 
 	{  // perform a Cartesian motion, defined as a relative offset in joint space
 		auto stage = std::make_unique<stages::MoveRelative>("joint offset", cartesian_interpolation);
 		stage->setGroup(group);
-		std::map<std::string, double> offsets = { { "panda_joint1", M_PI / 6. }, { "panda_joint3", -M_PI / 6 } };
+		std::map<std::string, double> offsets = { { "wrist_1_joint", 0.01 }, { "elbow_joint", -0.01 } };
 		stage->setDirection(offsets);
-		t.add(std::move(stage));
-	}
-
-	{  // move gripper into predefined open state
-		auto stage = std::make_unique<stages::MoveTo>("open gripper", joint_interpolation);
-		stage->setGroup(eef);
-		stage->setGoal("open");
 		t.add(std::move(stage));
 	}
 
@@ -139,8 +160,13 @@ int main(int argc, char** argv) {
 
 	auto task = createTask();
 	try {
-		if (task.plan())
+		if (task.plan()) {
 			task.introspection().publishSolution(*task.solutions().front());
+			ROS_INFO("Planen erfolgreich");
+			task.execute(*task.solutions().front());
+			ROS_INFO("verfahren");
+		}
+
 	} catch (const InitStageException& ex) {
 		std::cerr << "planning failed with exception" << std::endl << ex << task;
 	}

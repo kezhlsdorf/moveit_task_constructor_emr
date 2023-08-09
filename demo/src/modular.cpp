@@ -31,7 +31,9 @@
 /* Author: Robert Haschke
    Desc:   Planning a simple sequence of Cartesian motions
 */
-
+/*
+	modified for UR5e by RoboCop 09.08.2023
+*/
 #include <moveit/task_constructor/task.h>
 
 #include <moveit/task_constructor/stages/current_state.h>
@@ -57,21 +59,21 @@ std::unique_ptr<SerialContainer> createModule(const std::string& group) {
 	auto joint_interpolation = std::make_shared<solvers::JointInterpolationPlanner>();
 
 	{
-		auto stage = std::make_unique<stages::MoveRelative>("x +0.2", cartesian);
+		auto stage = std::make_unique<stages::MoveRelative>("x +0.1", cartesian);
 		stage->properties().configureInitFrom(Stage::PARENT, { "group" });
 		geometry_msgs::Vector3Stamped direction;
-		direction.header.frame_id = "world";
-		direction.vector.x = 0.2;
+		direction.header.frame_id = "base_link";
+		direction.vector.x = 0.1;
 		stage->setDirection(direction);
 		c->insert(std::move(stage));
 	}
 
 	{
-		auto stage = std::make_unique<stages::MoveRelative>("y -0.3", cartesian);
+		auto stage = std::make_unique<stages::MoveRelative>("y 0.1", cartesian);
 		stage->properties().configureInitFrom(Stage::PARENT);
 		geometry_msgs::Vector3Stamped direction;
-		direction.header.frame_id = "world";
-		direction.vector.y = -0.3;
+		direction.header.frame_id = "base_link";
+		direction.vector.y = 0.1;
 		stage->setDirection(direction);
 		c->insert(std::move(stage));
 	}
@@ -80,16 +82,16 @@ std::unique_ptr<SerialContainer> createModule(const std::string& group) {
 		auto stage = std::make_unique<stages::MoveRelative>("rz +45°", cartesian);
 		stage->properties().configureInitFrom(Stage::PARENT);
 		geometry_msgs::TwistStamped twist;
-		twist.header.frame_id = "world";
+		twist.header.frame_id = "base_link";
 		twist.twist.angular.z = M_PI / 4.;
 		stage->setDirection(twist);
 		c->insert(std::move(stage));
 	}
 
 	{  // move back to ready pose
-		auto stage = std::make_unique<stages::MoveTo>("moveTo ready", joint_interpolation);
+		auto stage = std::make_unique<stages::MoveTo>("moveTo home", joint_interpolation);
 		stage->properties().configureInitFrom(Stage::PARENT);
-		stage->setGoal("ready");
+		stage->setGoal("home");
 		c->insert(std::move(stage));
 	}
 	return c;
@@ -100,7 +102,7 @@ Task createTask() {
 	t.stages()->setName("Reusable Containers");
 	t.add(std::make_unique<stages::CurrentState>("current"));
 
-	const std::string group = "panda_arm";
+	const std::string group = "manipulator";
 	t.add(createModule(group));
 	t.add(createModule(group));
 	t.add(createModule(group));
@@ -120,6 +122,9 @@ int main(int argc, char** argv) {
 	try {
 		if (task.plan())
 			task.introspection().publishSolution(*task.solutions().front());
+			ROS_INFO("Planen erfolgreich");
+			task.execute(*task.solutions().front());
+			ROS_INFO("verfahren");
 	} catch (const InitStageException& ex) {
 		std::cerr << "planning failed with exception" << std::endl << ex << task;
 	}
