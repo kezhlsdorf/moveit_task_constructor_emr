@@ -8,9 +8,11 @@ Vorraussetzung Ubuntu Focal Fossa 20.4 (LTS), Workspace Moveit  **~/ws_moveit/sr
 1. Terminal öffnen mit STRG+ALT+T. In catkin workspace gehen
 >$ cd ~/ws_moveit/src
 2. Klonen des Repositoriums nach catkin_ws/src
->$ git clone https://github.com/ros-planning/moveit_task_constructor.git
+>$ git clone https://github.com/kezhlsdorf/moveit_task_constructor_emr.git
 3. Installieren von fehlenden Paketen
 >$ rosdep install --from-paths . --ignore-src --rosdistro $ROS_DISTRO
+4. Ordner umbenennen
+~/ws_moveit/src/moveit_task_constructor_emr in ~/ws_moveit/src/moveit_task_constructor
 4. Kompilieren mit dem catkin-Build-System
 >$ cd ~/ws_moveit
 
