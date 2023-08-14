@@ -14,7 +14,8 @@ Vorraussetzung Ubuntu Focal Fossa 20.4 (LTS), Workspace Moveit  **~/ws_moveit/sr
 4. Ordner umbenennen
 
 ~/ws_moveit/src/moveit_task_constructor_emr in ~/ws_moveit/src/moveit_task_constructor
-4. Kompilieren mit dem catkin-Build-System
+
+5. Kompilieren mit dem catkin-Build-System
 >$ cd ~/ws_moveit
 
 >$ catkin build
