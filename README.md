@@ -1,37 +1,6 @@
 # MoveIt Task Constructor Framework
 Das Task Constructor Framework bietet eine flexible und transparente Methode zur Definition und Planung von Aktionen, die aus mehreren voneinander abhängigen Teilaufgaben bestehen. Es stützt sich auf die Planungsfähigkeiten von [MoveIt] (https://moveit.ros.org/), um einzelne Teilprobleme in Black-Box *Planungsphasen* zu lösen. Eine gemeinsame Schnittstelle, die auf der PlanningScene von MoveIt basiert, wird zur Übergabe von Lösungshypothesen zwischen den Stufen verwendet. Das Framework ermöglicht die hierarchische Organisation von Basisstufen mit Hilfe von *Containern*, die sowohl sequentielle als auch parallele Kompositionen erlauben.
 
-## Installation ##
-Wird in den **~/ws_moveit/src** geclont und mit catkin build kompiliert
-
-Vorraussetzung Ubuntu Focal Fossa 20.4 (LTS), Workspace Moveit  **~/ws_moveit/src**
-1. Terminal öffnen mit STRG+ALT+T. In catkin workspace gehen
->$ cd ~/ws_moveit/src
-2. Klonen des Repositoriums nach catkin_ws/src
->$ git clone https://github.com/kezhlsdorf/moveit_task_constructor_emr.git
-3. Installieren von fehlenden Paketen
->$ rosdep install --from-paths . --ignore-src --rosdistro $ROS_DISTRO
-4. Ordner umbenennen
-
-~/ws_moveit/src/moveit_task_constructor_emr in ~/ws_moveit/src/moveit_task_constructor
-
-5. Kompilieren mit dem catkin-Build-System
->$ cd ~/ws_moveit
-
->$ catkin build
-
-## Usage - Start der Basisumgebung mit UR5 ##
-Das Moveit Task Constructor Paket enthält mehrer Beispiele. Modifiziert wurden hierfür die Bespiele um diese im Labor an den Universial Robot auszutesten.
-
->$ roslaunch moveit_task_constructor_demo ur5_demo.launch
-
-Die Aufgaben können nun ausgeführt werden, sie werden in RViz angezeigt.
-Anschließend können Sie die einzelnen Demos ausführen:
->$ rosrun moveit_task_constructor_demo cartesian
-
->$ rosrun moveit_task_constructor_demo modular
-
-
 
 ## MoveIt Task Constructor Framework
 
@@ -87,3 +56,35 @@ _International Conference on Robotics and Automation (ICRA)_, 2019, Montreal, Ca
   year={2019}
 }
 ```
+
+# Modified by Karstack_overflow, niehue98, kezhlsdorf for our project (14.08.2023)
+
+## Installation ##
+Wird in den **~/ws_moveit/src** geclont und mit catkin build kompiliert
+
+Vorraussetzung Ubuntu Focal Fossa 20.4 (LTS), Workspace Moveit  **~/ws_moveit/src**
+1. Terminal öffnen mit STRG+ALT+T. In catkin workspace gehen
+>$ cd ~/ws_moveit/src
+2. Klonen des Repositoriums nach catkin_ws/src
+>$ git clone https://github.com/kezhlsdorf/moveit_task_constructor_emr.git
+3. Installieren von fehlenden Paketen
+>$ rosdep install --from-paths . --ignore-src --rosdistro $ROS_DISTRO
+4. Ordner umbenennen
+
+~/ws_moveit/src/moveit_task_constructor_emr in ~/ws_moveit/src/moveit_task_constructor
+
+5. Kompilieren mit dem catkin-Build-System
+>$ cd ~/ws_moveit
+
+>$ catkin build
+
+## Usage - Start der Basisumgebung mit UR5 ##
+Das Moveit Task Constructor Paket enthält mehrer Beispiele. Modifiziert wurden hierfür die Bespiele um diese im Labor an den Universial Robot auszutesten.
+
+>$ roslaunch moveit_task_constructor_demo ur5_demo.launch
+
+Die Aufgaben können nun ausgeführt werden, sie werden in RViz angezeigt.
+Anschließend können Sie die einzelnen Demos ausführen:
+>$ rosrun moveit_task_constructor_demo cartesian
+
+>$ rosrun moveit_task_constructor_demo modular
